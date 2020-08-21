@@ -1,26 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useEffect} from 'react';
 import './App.css';
+import ImgBlock from "./components/ImgBlock/ImgBlock";
+import {getImgData} from "./Redux/img-reducer";
+import {connect} from "react-redux";
+import InfiniteScroll from "react-infinite-scroll-component";
+import Preloader from "./components/Preloader/Preloader";
 
-function App() {
+function App(props) {
+
+    useEffect(() => {
+        props.getImgData()
+    }, [])
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <InfiniteScroll next={props.getImgData} hasMore={true} loader={<Preloader />} dataLength={props.imgData.length}>
+            <div className="imgWrapper">
+                {props.imgData.map(image => {
+                    return <ImgBlock url={image.urls.thumb} key={image.id} />
+                })}
+            </div>
+        </InfiniteScroll>
     </div>
   );
 }
 
-export default App;
+const mapStateToProps = (state) => {
+    return {
+        imgData: state.images.imagesData
+    }
+}
+
+export default connect(mapStateToProps, {getImgData})(App);
